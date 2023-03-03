@@ -1,6 +1,14 @@
 from rest_framework import serializers
-from .models import Quizzes,  Questions,Play
+from .models import Category, Quizzes,  Questions,QuizPlay
+from django.db.models import Avg, Sum
 from rest_framework.response import Response
+
+# Category serialiser
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = ['name']
+
 
 # Quiz Create Serializer
 class QuizCreateSerializer(serializers.ModelSerializer):
@@ -43,7 +51,7 @@ class QuestionListSerializer(serializers.ModelSerializer):
     user = serializers.ReadOnlyField()
     class Meta:
         model = Questions
-        fields = ['id','user','quiz','difficulty','question','option_one','option_two','option_three','correct_answer','availible','date_created']
+        fields = ['id','user','quiz','difficulty','question','option_one','option_two','option_three','correct_answer','date_created']
 
     def to_representation(self, instance):
         rep = super(QuestionListSerializer, self).to_representation(instance)
@@ -56,26 +64,24 @@ class QuestionListSerializer(serializers.ModelSerializer):
 class PlayQuizSerializer(serializers.ModelSerializer):
     score = serializers.IntegerField(read_only=True)
     class Meta:
-        model = Play
-        fields = ['quiz', 'question','answered','score']
-
+        model = QuizPlay
+        fields = ['question','answered','score']
 
     def create(self, validated_data):
         user = self.context['request'].user  
-        quiz = self.validated_data['quiz']
         question = self.validated_data['question']
         score = self.validated_data.pop('score', None)
-        if Questions.objects.filter(quiz=quiz, question=question):
-            if Play.objects.filter(question=question,user=user).exists():
+        if Questions.objects.filter(question=question):
+            if QuizPlay.objects.filter(question=question,user=user).exists():
                 raise serializers.ValidationError({"Error":"Already answered this question"})
             else:
                 if self.validated_data['answered'] == question.correct_answer:
                     score = 1
-                    play = Play.objects.create(**validated_data,score=score,user=user)
+                    play = QuizPlay.objects.create(**validated_data,score=score,user=user)
                     play.save()
                     return play
                 else:
-                    play = Play.objects.create(**validated_data,user=user)
+                    play = QuizPlay.objects.create(**validated_data,user=user)
                     play.save()
                     return play
         else:
@@ -86,45 +92,35 @@ class PlayQuizSerializer(serializers.ModelSerializer):
 class AllPlayListSerializer(serializers.ModelSerializer):
     correct_answer = serializers.ReadOnlyField()
     class Meta:
-        model = Play
-        fields = ['user', 'quiz','score','question','answered','correct_answer',]
+        model = QuizPlay
+        fields = ['user', 'score','question','answered','correct_answer',]
     
     def to_representation(self, instance):
         rep = super(AllPlayListSerializer, self).to_representation(instance)
         rep['user'] = instance.user.username
         rep['question'] = instance.question.question
-        rep['quiz'] = instance.question.quiz.title
         rep['correct_answer'] = instance.question.correct_answer
         return rep
-    
-    def validate(self, data):
-        if data.answered == data.question.correct_answer:
-            data.score += 1
-        return data
 
 # User Play list Serializer 
 class UserPlayListSerializer(serializers.ModelSerializer):
     correct_answer = serializers.ReadOnlyField()
-
     class Meta:
-        model = Play
-        fields = [ 'quiz','score','question','answered','correct_answer',]
+        model = QuizPlay
+        fields = ['score','question','answered','correct_answer',]
     
     def to_representation(self, instance):
         rep = super(UserPlayListSerializer, self).to_representation(instance)
         rep['question'] = instance.question.question
-        rep['quiz'] = instance.question.quiz.title
         rep['correct_answer'] = instance.question.correct_answer
         return rep
 
 
-# Quiz Analysis
 class QuizAnalysisSerializer(serializers.ModelSerializer):
+    # percentage = serializers.SerializerMethodField()
     class Meta:
-        model = Play
-        fields = ['quiz','score']
-    
-    def to_representation(self, instance):
-        rep = super(QuizAnalysisSerializer, self).to_representation(instance)
-        rep['quiz'] = instance.quiz.title
-        return rep
+        model = QuizPlay
+        fields = ['question', 'score', 'attempt']
+
+
+

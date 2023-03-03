@@ -3,12 +3,10 @@ from django.contrib.auth.models import User
 from rest_framework import (generics, status)
 from rest_framework.response import Response
 from rest_framework.permissions import IsAdminUser
-from rest_framework.authentication import (BasicAuthentication, SessionAuthentication, TokenAuthentication)
 from .serializers import (UserCreateSerializer, UserListSerializer, UserUpdateSerializer, UserDeleteSerializer)
 
 #User Create View 
 class UserCreateView(generics.CreateAPIView):
-    authentication_classes = [BasicAuthentication, SessionAuthentication, TokenAuthentication] 
     permission_classes = [IsAdminUser]
 
     def create(self, request):
@@ -21,7 +19,6 @@ class UserCreateView(generics.CreateAPIView):
     
 # User List View
 class UserListView(generics.ListAPIView):
-    authentication_classes = [BasicAuthentication, SessionAuthentication, TokenAuthentication]
     permission_classes = [IsAdminUser]
 
     queryset =User.objects.all()
@@ -29,7 +26,6 @@ class UserListView(generics.ListAPIView):
 
 # Update User View
 class UserUpdateView(generics.UpdateAPIView):
-    authentication_classes = [BasicAuthentication, SessionAuthentication, TokenAuthentication]
     permission_classes = [IsAdminUser]
 
     queryset = User.objects.all()
@@ -37,7 +33,6 @@ class UserUpdateView(generics.UpdateAPIView):
 
 # Delete User View
 class UserDeleteView(generics.DestroyAPIView):
-    authentication_classes = [BasicAuthentication, SessionAuthentication, TokenAuthentication]
     permission_classes = [IsAdminUser]
 
     queryset = User.objects.all()
