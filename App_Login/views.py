@@ -15,6 +15,7 @@ from .serializers import (RegisterSerializer, LoginSerializer)
 # User Register View
 class RegisterView(generics.CreateAPIView):
     permission_classes = [AllowAny]
+    serializer_class = RegisterSerializer
 
     def create(self, request):
         user = RegisterSerializer(data=self.request.data)
@@ -26,6 +27,7 @@ class RegisterView(generics.CreateAPIView):
 
 # User Login View
 class LoginView(generics.GenericAPIView):
+    serializer_class = LoginSerializer
     permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
@@ -38,7 +40,6 @@ class LoginView(generics.GenericAPIView):
 
 # Profile View for the current user
 class ProfileView(generics.GenericAPIView):
-    authentication_classes = [BasicAuthentication, SessionAuthentication, TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
     def get(self, format=None):

@@ -3,8 +3,8 @@ from django.urls import path
 
 from App_Admin.views import (UserCreateView, UserListView, UserUpdateView, UserDeleteView)
 from App_Login.views import (RegisterView, LoginView,CustomAuthToken, ProfileView, LogoutView, LogoutAllView)
-from App.views import (Home, QuizCreateView, QuizListView ,QuestionCreateView, QuestionListView)
-from App.views import (PlayQuizView, AllPlayListView, UserPlayListView, QuizAnalysisView)
+from App.views import (CategoryCreateView, CategoryListView, QuizCreateView, QuizListView ,QuestionCreateView, QuestionListView)
+from App.views import (PlayQuizView, AllPlayListView, UserPlayListView, QuizAnalysisView, AvailibelQuizListView)
 
 from rest_framework_simplejwt.views import (TokenObtainPairView,TokenRefreshView,TokenVerifyView)
 
@@ -12,17 +12,23 @@ from rest_framework_simplejwt.views import (TokenObtainPairView,TokenRefreshView
 urlpatterns = [
 
     # Quiz CRUD related urls
-    path('',Home.as_view()),
+    # path('',Home.as_view()),
+
+    path('category-create/', CategoryCreateView.as_view()),
+    path('category-list/', CategoryListView.as_view()),
 
     path('quiz-create/', QuizCreateView.as_view()),
     path('quiz-list/', QuizListView.as_view()),
 
     path('question-create/', QuestionCreateView.as_view()),
     path('question-list/', QuestionListView.as_view()),
-    path('play/',PlayQuizView.as_view()),
+    
+    path('quiz-play/',PlayQuizView.as_view()),
     path('all-playlist/',AllPlayListView.as_view()),
     path('my-playlist/',UserPlayListView.as_view()),
-    path('analysis/',QuizAnalysisView.as_view()),
+    path('quiz-availible/',AvailibelQuizListView.as_view()),
+    
+    path('quiz-analysis/',QuizAnalysisView.as_view()),
 
     # Admin Page 
     path('admin/', admin.site.urls),
@@ -37,7 +43,7 @@ urlpatterns = [
     path('register/',RegisterView.as_view()),
     path('login/', LoginView.as_view()),
     path('custom-token/', CustomAuthToken.as_view()),
-    path('profile/', ProfileView.as_view()),
+    path('', ProfileView.as_view()),
     path('logout/', LogoutView.as_view(), name='auth_logout'),
     path('logout-all/', LogoutAllView.as_view(), name='logout-all'),
 
