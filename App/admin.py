@@ -19,6 +19,7 @@ class QuestionAdmin(admin.ModelAdmin):
 @admin.register(models.QuizPlay)
 class PlayAdmin(admin.ModelAdmin):
     fields = ['user', 'question','answered',]
-    list_display = ['user_id','question_id','answered','score','attempt','date_played']
+    list_display = ['user_id','question_id','answered','score','attempt','status','date_played']
+    # list_editable = ['status']
 
 

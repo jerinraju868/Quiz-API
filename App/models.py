@@ -60,6 +60,7 @@ class QuizPlay(models.Model):
     answered = models.CharField(max_length=250)
     attempt = models.IntegerField(default=1)
     score = models.IntegerField(default=0, verbose_name='Current Score')
+    status = models.CharField(max_length=12, default='Failed')
     date_played = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
