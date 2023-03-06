@@ -1,6 +1,8 @@
+import json
+from django.http import JsonResponse
 from django.shortcuts import render
 
-from rest_framework import generics, status
+from rest_framework import generics, status, views
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 
@@ -13,6 +15,8 @@ from .serializers import (CategorySerializer)
 from .serializers import (QuizCreateSerializer, QuizListSerializer)
 from .serializers import (QuestionCreateSerializer, QuestionListSerializer)
 from .serializers import (PlayQuizSerializer, AllPlayListSerializer, UserPlayListSerializer)
+
+
 from .serializers import QuizAnalysisSerializer
 # Category Create View
 class CategoryCreateView(generics.CreateAPIView):
@@ -110,32 +114,30 @@ class AvailibelQuizListView(generics.GenericAPIView):
         return Response(context)
 
 
-class QuizAnalysisView(generics.ListAPIView):
+class QuizAnalysisView(views.APIView):
     permission_classes = [IsAuthenticated]
 
-    queryset = QuizPlay.objects.all()
-    serializer_class =QuizAnalysisSerializer
+    # queryset = QuizPlay.objects.all()
+    # serializer_class =QuizAnalysisSerializer
     
-    def list(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
         user = self.request.user
         analysis = []
         quizzes = QuizPlay.objects.filter(user_id=user.id)
         if quizzes:
             for result in quizzes:
-                questions = Questions.objects.filter(quiz_id=result.question.quiz.id).count()
                 quiz = Quizzes.objects.filter(id=result.question.quiz.id)
-                users = QuizPlay.objects.filter(question=result.question).count()
+                users = QuizPlay.objects.filter(question=result.question, score=1).count()
 
-                total = QuizPlay.objects.filter(question_id=result.question.id).count()
+                total = QuizPlay.objects.filter(question=result.question).count()
                 for q in quiz:
                     analysis.append({
-                        "Quiz":q.title,
+                        "Quiz Title":q.title,
+                        "Question" : result.question.question,
                         'Total Marks':result.score,
                         'Average Score' : result.score/result.attempt,
                         'No of time Quiz Taken' : result.attempt,
                         'Number of User attend the quiz' : total,
                         'Percantage of the user passed' : (users/total)*100
                                     })
-
-        return Response({str(analysis)})
-    
+        return JsonResponse(list(analysis), safe=False)
